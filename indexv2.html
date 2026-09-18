@@ -250,7 +250,16 @@
         .status-msg.show {
             opacity: 1;
         }
-        
+
+         @media (max-width: 600px) {
+            .fill-editable {
+                min-width: 1.5rem;
+                padding: 0 0.3rem;
+            }
+            .fill-editable:empty::before {
+                width: 0.8rem;
+            }
+        }
         .offline-note {
             font-size: 0.82rem;
             color: #7a6f67;
