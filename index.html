@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<link rel="manifest" href="manifest.webmanifest">
+<title>主審宣言稿</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#202124;--muted:#6b7280;--accent:#2563eb;--border:#d1d5db}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif}
+header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+h1{font-size:20px;margin:0 12px 0 0}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
+button{border:1px solid var(--border);background:#fff;border-radius:9px;padding:9px 12px;cursor:pointer;font-size:14px;touch-action:manipulation}
+button:active{transform:scale(.97)}.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+label.switch{display:flex;align-items:center;gap:7px;font-size:14px;user-select:none}input[type=checkbox]{width:20px;height:20px}
+main{max-width:950px;margin:24px auto;padding:0 16px 50px}.notice{background:#eef4ff;border:1px solid #bfdbfe;padding:12px 14px;border-radius:10px;margin-bottom:16px;font-size:14px;line-height:1.6}
+.script{background:var(--card);border-radius:12px;padding:26px 30px;box-shadow:0 2px 10px #0000000d;font-size:19px;line-height:2.05}
+.paragraph{position:relative;margin:0 0 18px}.optional{border-left:3px solid #dbeafe;padding:10px 48px 10px 14px;background:#f8fbff;border-radius:8px}
+.optional.hidden{display:none}.toggle-all{float:right;margin:0 0 8px 12px;width:38px;height:38px;padding:0;border-radius:50%;font-size:25px;color:var(--accent);border-color:#bfdbfe}
+.fill{display:inline-block;min-width:58px;border-bottom:2px solid currentColor;padding:0 4px;line-height:1.4}.fill input{width:100%;border:0;outline:0;background:transparent;font:inherit;text-align:center;padding:0;color:inherit}
+body.editing .fixed-text{outline:1px dashed #f59e0b;border-radius:3px}
+.small{color:var(--muted);font-size:13px}.print-title{display:none}
+@media(max-width:650px){header{position:static}.toolbar{margin-left:0;width:100%}.script{padding:20px 17px;font-size:17px}}
+@media print{body{background:#fff}header,.notice,.toggle-all{display:none!important}main{max-width:none;margin:0;padding:0}.script{box-shadow:none;padding:0;font-size:18px}.optional{background:none;border:0;padding-left:0}.print-title{display:block;font-size:22px;font-weight:bold;margin-bottom:15px}}
+</style>
+</head>
+<body>
+<header>
+<h1>主審宣言稿</h1>
+<div class="toolbar">
+<label class="switch"><input id="editToggle" type="checkbox">完整修改內文</label>
+<button id="resetBtn">重設填空</button>
+<button id="printBtn" class="primary">列印／另存 PDF</button>
+</div>
+</header>
+<main>
+<div class="notice"><b>使用方式：</b>底線欄位可直接填寫；右側「＋／−」會同時控制兩個選擇性段落。開啟「完整修改內文」後才能修改固定稿件。資料會儲存在此瀏覽器，可離線使用。</div>
+<div class="script" id="script">
+<div class="print-title">寶可夢卡牌比賽｜主審宣言稿</div>
+<p class="paragraph">大家好，我是今天的主審<span class="fill"><input data-key="chief" placeholder="主審姓名"></span>，<br>
+歡迎各位訓練家參加今天<span class="fill"><input data-key="month" placeholder="月"></span>月<span class="fill"><input data-key="day" placeholder="日"></span>號的<span class="fill"><input data-key="ball" placeholder="球"></span>球比賽</p>
+<p class="paragraph">本次比賽共有<span class="fill"><input data-key="players" placeholder="人數"></span>位訓練家參賽，總共會進行<span class="fill"><input data-key="rounds" placeholder="輪數"></span>輪的瑞士制預賽，並取排名前<span class="fill"><input data-key="top" placeholder="強"></span>強的玩家進行單淘汰復賽，每輪比賽時間為25分鐘。</p>
+<p class="paragraph">以下說明賽制內容<br>每場瑞士輪的25分鐘比賽時間到時<br>如果是先攻玩家回合 將進行到後攻玩家回合結束<br>如果是在後攻玩家回合 將進行到該玩家回合結束<br>後攻玩家回合結束後比賽如果還沒分出勝負 將會以雙敗來判定。</p>
+<button id="optionalToggle" class="toggle-all" aria-label="顯示或隱藏選擇性段落" aria-expanded="true">−</button>
+<div id="optionalBlock">
+<p class="paragraph optional">本場比賽中除了主審我以外，還有數位裁判夥伴會一起協助執法，請裁判幫我舉手讓訓練家們知道一下喔。好的，謝謝請放下</p>
+<p class="paragraph optional">當比賽過程中如果有任何的問題，請舉手呼叫裁判，我(們)將會為各位協助，如果玩家對於判罰內容有任何問題，你可以進行上訴到我主審這邊，而我的判決將會是今天的最終答案，以上有沒有玩家有任何的問題想詢問的呢？</p>
+</div>
+<p class="paragraph" id="normalQuestion">當比賽過程中如果有任何的問題，請舉手呼叫裁判，我(們)將會為各位協助，而我的判決將會是今天的最終答案，以上有沒有玩家有任何的問題想詢問的呢？</p>
+<p class="paragraph">好的，如果都沒有的話，現在請各位訓練家跟你的對手打個招呼，我們比賽即將進行～</p>
+</div></main>
+<script>
+const KEY="judge_script_pwa_v2";
+const defaults={chief:"",month:"",day:"",ball:"",players:"",rounds:"",top:"",showOptional:true};
+function read(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||"{}")}}catch{return {...defaults}}}
+function save(){const d={};document.querySelectorAll("input[data-key]").forEach(x=>d[x.dataset.key]=x.value);d.showOptional=!document.getElementById("optionalBlock").classList.contains("hidden");localStorage.setItem(KEY,JSON.stringify(d))}
+function apply(){const d=read();document.querySelectorAll("input[data-key]").forEach(x=>x.value=d[x.dataset.key]??"");setOptional(d.showOptional)}
+function setOptional(show){document.getElementById("optionalBlock").classList.toggle("hidden",!show);const b=document.getElementById("optionalToggle");b.textContent=show?"−":"+";b.setAttribute("aria-expanded",String(show));save()}
+function setEditing(on){document.body.classList.toggle("editing",on)}
+document.querySelectorAll("input[data-key]").forEach(x=>x.addEventListener("input",save));
+document.getElementById("optionalToggle").addEventListener("click",()=>{const hidden=document.getElementById("optionalBlock").classList.contains("hidden");setOptional(hidden)});
+document.getElementById("editToggle").addEventListener("change",e=>setEditing(e.target.checked));
+document.getElementById("resetBtn").addEventListener("click",()=>{if(confirm("確定清除所有填空並顯示選擇性段落嗎？")){localStorage.removeItem(KEY);apply()}});
+document.getElementById("printBtn").addEventListener("click",()=>window.print());
+apply();
+if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
+</script>
+</body></html>
