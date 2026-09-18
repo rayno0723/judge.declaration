@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主審宣言</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', 'Noto Sans TC', sans-serif;
+            background: #f5f3f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem 1rem;
+        }
+
+        .app-container {
+            max-width: 900px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.06);
+            padding: 2rem 2rem 2rem 2rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2.2rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e6e2db;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            user-select: none;
+            background: #f0ede8;
+            padding: 0.45rem 0.9rem 0.45rem 1rem;
+            border-radius: 40px;
+            transition: background 0.2s;
+        }
+
+        .toggle-switch:hover {
+            background: #e6e1da;
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .toggle-slider {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #b9b1a8;
+            border-radius: 40px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .toggle-slider::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background: #2b6e4f;
+        }
+
+        input:checked + .toggle-slider::after {
+            transform: translateX(20px);
+        }
+
+        .toggle-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #2e2a26;
+            letter-spacing: 0.02em;
+        }
+
+        .action-btn {
+            border: none;
+            padding: 0.55rem 1.1rem;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            letter-spacing: 0.02em;
+            font-family: inherit;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        .save-btn {
+            background: #2b6e4f;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(43, 110, 79, 0.25);
+        }
+
+        .save-btn:hover {
+            background: #235c42;
+        }
+
+        .reset-btn {
+            background: #f0ede8;
+            color: #7a3b3b;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .reset-btn:hover {
+            background: #ffe6e6;
+            color: #a02020;
+        }
+
+        .declaration {
+            font-size: 1.12rem;
+            line-height: 1.75;
+            color: #1f1b17;
+            white-space: pre-wrap;
+            word-break: break-word;
+            transition: all 0.2s;
+        }
+
+        .declaration[contenteditable="true"] {
+            background: #fefcf9;
+            outline: 2px dashed #2b6e4f;
+            outline-offset: 6px;
+            padding: 1.2rem 1.5rem;
+            border-radius: 18px;
+            font-family: 'Courier New', 'Noto Sans TC', monospace;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            color: #1a1a1a;
+            cursor: text;
+        }
+
+        .fill-editable {
+            display: inline-block;
+            min-width: 6rem;
+            border-bottom: 2.5px solid #2b6e4f;
+            text-align: center;
+            font-weight: 600;
+            color: #1e4d3a;
+            padding: 0 0.2rem;
+            margin: 0 0.1rem;
+            white-space: nowrap;
+            outline: none;
+            background: #f2f9f5;
+            border-radius: 4px 4px 0 0;
+            transition: background 0.15s;
+            cursor: text;
+        }
+
+        .fill-editable:focus {
+            background: #e3f1ea;
+            border-bottom-color: #1a4f37;
+            box-shadow: 0 2px 6px rgba(43, 110, 79, 0.15);
+        }
+
+        .fixed-text {
+            user-select: none;
+        }
+
+        .hidden-section {
+            display: none;
+        }
+
+        .section-wrapper {
+            display: inline;
+        }
+
+        .section-wrapper.hidden-section {
+            display: none;
+        }
+
+        .toggleable-section {
+            background-color: #ffe6e6;
+            border-radius: 4px;
+            padding: 0 0.2rem;
+        }
+
+        .declaration p {
+            margin-bottom: 1.25rem;
+        }
+
+        .declaration p:last-child {
+            margin-bottom: 0;
+        }
+
+        .fill-editable:empty::before {
+            content: '';
+            display: inline-block;
+            width: 2rem;
+        }
+
+        .fill-editable {
+            min-width: 5rem;
+        }
+
+        .declaration[contenteditable="true"] .fill-editable {
+            background: transparent;
+        }
+
+        .status-msg {
+            font-size: 0.85rem;
+            color: #2b6e4f;
+            font-weight: 500;
+            min-height: 1.2em;
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+
+        .status-msg.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="plainTextToggle">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">純文字模式</span>
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="soloJudgeToggle">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">單人執法</span>
+                </label>
+                <span class="status-msg" id="statusMsg"></span>
+            </div>
+            <div class="toolbar-right">
+                <button class="action-btn save-btn" id="saveBtn" title="將目前內容存為新版預設">儲存</button>
+                <button class="action-btn reset-btn" id="resetBtn" title="清空儲存並恢復預設內容">重置回預設</button>
+            </div>
+        </div>
+
+        <div class="declaration" id="declarationContent">
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const declarationEl = document.getElementById('declarationContent');
+            const plainToggle = document.getElementById('plainTextToggle');
+            const soloJudgeToggle = document.getElementById('soloJudgeToggle');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const statusMsg = document.getElementById('statusMsg');
+
+            const STORAGE_KEY = 'declaration_saved_v1';
+
+            let statusTimer = null;
+            function showStatus(text, isError) {
+                if (statusTimer) clearTimeout(statusTimer);
+                statusMsg.textContent = text;
+                statusMsg.style.color = isError ? '#a02020' : '#2b6e4f';
+                statusMsg.classList.add('show');
+                statusTimer = setTimeout(() => {
+                    statusMsg.classList.remove('show');
+                }, 2200);
+            }
+
+            function fixed(text) {
+                const span = document.createElement('span');
+                span.className = 'fixed-text';
+                span.textContent = text;
+                span.contentEditable = 'false';
+                return span;
+            }
+
+            function fill(placeholder = '') {
+                const span = document.createElement('span');
+                span.className = 'fill-editable';
+                span.contentEditable = 'true';
+                span.textContent = placeholder;
+                return span;
+            }
+
+            function buildDefaultContent() {
+                declarationEl.innerHTML = '';
+
+                const p1 = document.createElement('p');
+                p1.appendChild(fixed('大家好，我是今天的主審'));
+                p1.appendChild(fill());
+                p1.appendChild(fixed('， 歡迎各位訓練家參加今天'));
+                p1.appendChild(fill());
+                p1.appendChild(fixed('月'));
+                p1.appendChild(fill());
+                p1.appendChild(fixed('號的'));
+                p1.appendChild(fill());
+                p1.appendChild(fixed('球賽。'));
+                declarationEl.appendChild(p1);
+
+                const p2 = document.createElement('p');
+                p2.appendChild(fixed('本次比賽共有'));
+                p2.appendChild(fill());
+                p2.appendChild(fixed('位訓練家參賽，總共會進行'));
+                p2.appendChild(fill());
+                p2.appendChild(fixed('輪的瑞士制預賽，並取排名前'));
+                p2.appendChild(fill());
+                p2.appendChild(fixed('強的玩家進行單淘汰復賽，每輪比賽時間為25分鐘 。'));
+                declarationEl.appendChild(p2);
+
+                const p3 = document.createElement('p');
+                p3.appendChild(fixed('以下說明賽制內容，當每局瑞士輪的25分鐘比賽時間到時\n1.如果是先攻玩家回合 將持續進行到後攻玩家的回合結束才判定\n2.如果是在後攻玩家回合 則該玩家回合結束時遊戲就會結束\n\n當後攻玩家回合結束後比賽如果還沒分出勝負 將會以雙敗來判定。 '));
+                declarationEl.appendChild(p3);
+
+                const p4 = document.createElement('p');
+                const sectionA = document.createElement('span');
+                sectionA.className = 'section-wrapper toggleable-section';
+                const sectionAText = document.createElement('span');
+                sectionAText.className = 'fixed-text';
+                sectionAText.contentEditable = 'false';
+                sectionAText.textContent = '同時本場比賽中除了主審我以外，還有幾位裁判夥伴會一起協助執法，請裁判幫我舉手讓訓練家們知道一下喔。 \n好的，謝謝請放下。';
+                sectionA.appendChild(sectionAText);
+                p4.appendChild(sectionA);
+                declarationEl.appendChild(p4);
+
+                const p5 = document.createElement('p');
+                p5.appendChild(fixed('當比賽過程中如果有任何的問題，請舉手呼叫裁判，我(們)將盡快會為各位協助。'));
+                declarationEl.appendChild(p5);
+
+                const p6 = document.createElement('p');
+                const sectionB = document.createElement('span');
+                sectionB.className = 'section-wrapper toggleable-section';
+                const sectionBText = document.createElement('span');
+                sectionBText.className = 'fixed-text';
+                sectionBText.contentEditable = 'false';
+                sectionBText.textContent = '如果玩家對於裁判的判決內容有任何問題，可以進行上訴，所有的上訴最終都會到我主審這邊';
+                sectionB.appendChild(sectionBText);
+                p6.appendChild(sectionB);
+
+                p6.appendChild(fixed('而我的最後判決將會是今天的最終答案，以上內容有玩家有任何疑問的嗎？ '));
+                declarationEl.appendChild(p6);
+
+                const p7 = document.createElement('p');
+                p7.appendChild(fixed('好的，如果都沒有的話，現在請各位訓練家跟你的對手打個招呼，我們比賽即將進行～'));
+                declarationEl.appendChild(p7);
+            }
+
+            function getCleanInnerHTML() {
+                const clone = declarationEl.cloneNode(true);
+                clone.removeAttribute('contenteditable');
+                clone.querySelectorAll('[contenteditable]').forEach(el => {
+                    el.removeAttribute('contenteditable');
+                });
+                return clone.innerHTML;
+            }
+
+            function loadSavedContent() {
+                try {
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    if (saved && saved.trim() !== '') {
+                        declarationEl.innerHTML = saved;
+                        return true;
+                    }
+                } catch (e) {
+                    // localStorage 無法使用時，直接使用預設
+                }
+                return false;
+            }
+
+            function applyToggleableVisibility() {
+                const hideSections = soloJudgeToggle.checked;
+                document.querySelectorAll('.toggleable-section').forEach(sec => {
+                    if (hideSections) {
+                        sec.classList.add('hidden-section');
+                    } else {
+                        sec.classList.remove('hidden-section');
+                    }
+                });
+            }
+
+            function setPlainTextMode(enabled) {
+                const decl = declarationEl;
+                const fixedSpans = decl.querySelectorAll('.fixed-text');
+                const fillSpans = decl.querySelectorAll('.fill-editable');
+
+                if (enabled) {
+                    decl.contentEditable = 'true';
+                    fixedSpans.forEach(span => {
+                        span.contentEditable = 'true';
+                    });
+                    fillSpans.forEach(span => {
+                        span.contentEditable = 'true';
+                    });
+                } else {
+                    decl.contentEditable = 'false';
+                    fixedSpans.forEach(span => {
+                        span.contentEditable = 'false';
+                    });
+                    fillSpans.forEach(span => {
+                        span.contentEditable = 'true';
+                    });
+                }
+            }
+
+            function refreshAll() {
+                applyToggleableVisibility();
+                setPlainTextMode(plainToggle.checked);
+            }
+
+            // 初始化內容
+            const hasSaved = loadSavedContent();
+            if (!hasSaved) {
+                buildDefaultContent();
+            }
+            refreshAll();
+
+            // 事件綁定
+            plainToggle.addEventListener('change', (e) => {
+                setPlainTextMode(e.target.checked);
+            });
+
+            soloJudgeToggle.addEventListener('change', () => {
+                applyToggleableVisibility();
+            });
+
+            saveBtn.addEventListener('click', () => {
+                try {
+                    const html = getCleanInnerHTML();
+                    localStorage.setItem(STORAGE_KEY, html);
+                    showStatus('已儲存！重新整理後將使用新版內容。', false);
+                } catch (e) {
+                    showStatus('儲存失敗：' + e.message, true);
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                if (!confirm('確定要重置回預設內容嗎？已儲存的編輯內容將會被清除。')) {
+                    return;
+                }
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                } catch (e) {
+                    // 忽略
+                }
+                buildDefaultContent();
+                refreshAll();
+                showStatus('已重置回預設內容。', false);
+            });
+        })();
+    </script>
+</body>
+</html>
