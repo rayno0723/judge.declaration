@@ -177,21 +177,22 @@
 
         .fill-editable {
             display: inline-block;
-            min-width: 2rem;
+            min-width: clamp(1.8rem, 7vw, 5rem);   /* 手機小、桌機大，中間自動過渡 */
             border-bottom: 2.5px solid #2b6e4f;
             text-align: center;
             font-weight: 600;
             color: #1e4d3a;
-            padding: 0 0.4rem;
+            padding: 0 clamp(0.15rem, 0.5vw, 0.4rem);
             margin: 0 0.1rem;
-            white-space: nowrap;
-            outline: none;
-            background: #f2f9f5;
-            border-radius: 4px 4px 0 0;
-            transition: background 0.15s;
-            cursor: text;
-        }
+    white-space: nowrap;
+    outline: none;
+    background: #f2f9f5;
+    border-radius: 4px 4px 0 0;
+    transition: background 0.15s;
+    cursor: text;
+}
 
+        
         .fill-editable:focus {
             background: #e3f1ea;
             border-bottom-color: #1a4f37;
@@ -251,15 +252,6 @@
             opacity: 1;
         }
 
-         @media (max-width: 600px) {
-            .fill-editable {
-                min-width: 1.5rem;
-                padding: 0 0.3rem;
-            }
-            .fill-editable:empty::before {
-                width: 0.8rem;
-            }
-        }
         .offline-note {
             font-size: 0.82rem;
             color: #7a6f67;
