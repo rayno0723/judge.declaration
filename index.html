@@ -177,12 +177,12 @@
 
         .fill-editable {
             display: inline-block;
-            min-width: 6rem;
+            min-width: 2rem;
             border-bottom: 2.5px solid #2b6e4f;
             text-align: center;
             font-weight: 600;
             color: #1e4d3a;
-            padding: 0 0.2rem;
+            padding: 0 0.4rem;
             margin: 0 0.1rem;
             white-space: nowrap;
             outline: none;
@@ -231,11 +231,7 @@
         .fill-editable:empty::before {
             content: '';
             display: inline-block;
-            width: 2rem;
-        }
-
-        .fill-editable {
-            min-width: 5rem;
+            width: 1rem;
         }
 
         .declaration[contenteditable="true"] .fill-editable {
