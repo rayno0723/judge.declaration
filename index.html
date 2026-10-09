@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 防快取 Meta 標籤 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>主審宣言</title>
     <style>
         * {
@@ -28,7 +32,7 @@
             background: #ffffff;
             border-radius: 28px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.06);
-            padding: 2rem 2rem 2rem 2rem;
+            padding: 2rem 2rem 2.5rem 2rem;
             transition: box-shadow 0.2s;
         }
 
@@ -177,22 +181,21 @@
 
         .fill-editable {
             display: inline-block;
-            min-width: clamp(1.8rem, 7vw, 5rem);   /* 手機小、桌機大，中間自動過渡 */
+            min-width: clamp(1.8rem, 7vw, 5rem);
             border-bottom: 2.5px solid #2b6e4f;
             text-align: center;
             font-weight: 600;
             color: #1e4d3a;
             padding: 0 clamp(0.15rem, 0.5vw, 0.4rem);
             margin: 0 0.1rem;
-    white-space: nowrap;
-    outline: none;
-    background: #f2f9f5;
-    border-radius: 4px 4px 0 0;
-    transition: background 0.15s;
-    cursor: text;
-}
+            white-space: nowrap;
+            outline: none;
+            background: #f2f9f5;
+            border-radius: 4px 4px 0 0;
+            transition: background 0.15s;
+            cursor: text;
+        }
 
-        
         .fill-editable:focus {
             background: #e3f1ea;
             border-bottom-color: #1a4f37;
@@ -204,21 +207,53 @@
         }
 
         .hidden-section {
-            display: none;
+            display: none !important;
         }
 
         .section-wrapper {
             display: inline;
         }
 
-        .section-wrapper.hidden-section {
-            display: none;
-        }
-
         .toggleable-section {
             background-color: #ffe6e6;
             border-radius: 4px;
             padding: 0 0.2rem;
+        }
+
+        /* 淘汰賽規則區塊樣式 */
+        .elimination-box {
+            margin-top: 1.8rem;
+            padding: 1.25rem 1.5rem;
+            background-color: #f4f8f5;
+            border-left: 4.5px solid #2b6e4f;
+            border-radius: 12px;
+            font-size: 1.02rem;
+            line-height: 1.8;
+            color: #2c3e35;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .elimination-title {
+            font-weight: 700;
+            font-size: 1.18rem;
+            color: #1b4733;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .elimination-subtitle {
+            font-weight: 700;
+            color: #235c42;
+            margin-top: 0.8rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .elimination-item {
+            margin-left: 0.2rem;
+            margin-bottom: 0.2rem;
         }
 
         .declaration p {
@@ -278,6 +313,11 @@
                     <span class="toggle-slider"></span>
                     <span class="toggle-label">單人執法</span>
                 </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="eliminationToggle">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">單淘汰規則</span>
+                </label>
                 <span class="offline-note">本頁面為本機離線</span>
                 <span class="status-msg" id="statusMsg"></span>
             </div>
@@ -296,11 +336,12 @@
             const declarationEl = document.getElementById('declarationContent');
             const plainToggle = document.getElementById('plainTextToggle');
             const soloJudgeToggle = document.getElementById('soloJudgeToggle');
+            const eliminationToggle = document.getElementById('eliminationToggle');
             const saveBtn = document.getElementById('saveBtn');
             const resetBtn = document.getElementById('resetBtn');
             const statusMsg = document.getElementById('statusMsg');
 
-            const STORAGE_KEY = 'declaration_saved_v1';
+            const STORAGE_KEY = 'declaration_saved_v3';
 
             let statusTimer = null;
             function showStatus(text, isError) {
@@ -389,6 +430,28 @@
                 const p7 = document.createElement('p');
                 p7.appendChild(fixed('好的，如果都沒有的話，現在請各位訓練家跟你的對手打個招呼，我們比賽即將進行～'));
                 declarationEl.appendChild(p7);
+
+                // 單淘汰規則區塊 (預設建立，透過開關控制顯隱)
+                const elimDiv = createEliminationElement();
+                declarationEl.appendChild(elimDiv);
+            }
+
+            function createEliminationElement() {
+                const elimDiv = document.createElement('div');
+                elimDiv.className = 'elimination-box hidden-section';
+                elimDiv.id = 'eliminationSection';
+                elimDiv.innerHTML = `
+                    <div class="elimination-title">🏆 單淘汰規則</div>
+                    <div class="elimination-item">- 有一方距離獲勝所需獎賞卡剩下2張以下︰⇒獎賞卡少的一方獲得勝利。</div>
+                    <div class="elimination-item">- 若雙⽅距離獲勝所需獎賞卡數量相同時︰</div>
+                    <div class="elimination-item" style="padding-left: 1rem;">⇒比賽延長，直到一方達成勝利條件，或是獎賞卡較少的一方獲勝。</div>
+                    <div class="elimination-item" style="padding-left: 1rem;">⇒若仍無法分出勝負，則進行6張獎賞卡的延長賽。</div>
+                    <div class="elimination-subtitle">條件②</div>
+                    <div class="elimination-item">- 若雙方距離獲勝所需獎賞卡在3張以上時︰</div>
+                    <div class="elimination-item" style="padding-left: 1rem;">⇒比賽延長，直到一方達成勝利條件，或是有一方距離獲勝所需獎賞卡剩2張以下時獲勝。</div>
+                    <div class="elimination-item" style="padding-left: 1rem;">⇒若仍無法分出勝負，則進行6張獎賞卡的延長賽。</div>
+                `;
+                return elimDiv;
             }
 
             function getCleanInnerHTML() {
@@ -405,10 +468,14 @@
                     const saved = localStorage.getItem(STORAGE_KEY);
                     if (saved && saved.trim() !== '') {
                         declarationEl.innerHTML = saved;
+                        // 確保載入時包含單淘汰區塊元素
+                        if (!document.getElementById('eliminationSection')) {
+                            declarationEl.appendChild(createEliminationElement());
+                        }
                         return true;
                     }
                 } catch (e) {
-                    // localStorage 無法使用時，直接使用預設
+                    // localStorage 無法使用時，使用預設
                 }
                 return false;
             }
@@ -422,6 +489,18 @@
                         sec.classList.remove('hidden-section');
                     }
                 });
+
+                let elimSection = document.getElementById('eliminationSection');
+                if (!elimSection) {
+                    elimSection = createEliminationElement();
+                    declarationEl.appendChild(elimSection);
+                }
+
+                if (eliminationToggle.checked) {
+                    elimSection.classList.remove('hidden-section');
+                } else {
+                    elimSection.classList.add('hidden-section');
+                }
             }
 
             function setPlainTextMode(enabled) {
@@ -453,19 +532,22 @@
                 setPlainTextMode(plainToggle.checked);
             }
 
-            // 初始化內容
+            // 初始化頁面內容
             const hasSaved = loadSavedContent();
             if (!hasSaved) {
                 buildDefaultContent();
             }
             refreshAll();
 
-            // 事件綁定
             plainToggle.addEventListener('change', (e) => {
                 setPlainTextMode(e.target.checked);
             });
 
             soloJudgeToggle.addEventListener('change', () => {
+                applyToggleableVisibility();
+            });
+
+            eliminationToggle.addEventListener('change', () => {
                 applyToggleableVisibility();
             });
 
@@ -488,6 +570,9 @@
                 } catch (e) {
                     // 忽略
                 }
+                plainToggle.checked = false;
+                soloJudgeToggle.checked = false;
+                eliminationToggle.checked = false;
                 buildDefaultContent();
                 refreshAll();
                 showStatus('已重置回預設內容。', false);
