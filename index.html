@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 防快取 Meta 標籤 -->
+    <!-- 禁止瀏覽器快取 Meta 標籤 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -32,7 +32,7 @@
             background: #ffffff;
             border-radius: 28px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.06);
-            padding: 2rem 2rem 2.5rem 2rem;
+            padding: 2rem;
             transition: box-shadow 0.2s;
         }
 
@@ -165,18 +165,9 @@
             transition: all 0.2s;
         }
 
-        .declaration[contenteditable="true"] {
-            background: #fefcf9;
-            outline: 2px dashed #2b6e4f;
-            outline-offset: 6px;
-            padding: 1.2rem 1.5rem;
-            border-radius: 18px;
-            font-family: 'Courier New', 'Noto Sans TC', monospace;
-            font-size: 1.05rem;
-            line-height: 1.7;
-            white-space: pre-wrap;
-            color: #1a1a1a;
-            cursor: text;
+        /* 普通模式下的固定與填空樣式 */
+        .fixed-text {
+            user-select: none;
         }
 
         .fill-editable {
@@ -202,8 +193,39 @@
             box-shadow: 0 2px 6px rgba(43, 110, 79, 0.15);
         }
 
-        .fixed-text {
-            user-select: none;
+        .fill-editable:empty::before {
+            content: '';
+            display: inline-block;
+            width: 1rem;
+        }
+
+        /* 內文編輯模式下的樣式設定 (解決 Safari/iPadOS 刪除過度問題) */
+        .declaration[contenteditable="true"] {
+            background: #fefcf9;
+            outline: 2px dashed #2b6e4f;
+            outline-offset: 6px;
+            padding: 1.2rem 1.5rem;
+            border-radius: 18px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            color: #1a1a1a;
+            cursor: text;
+        }
+
+        .declaration[contenteditable="true"] .fixed-text {
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+
+        .declaration[contenteditable="true"] .fill-editable {
+            background: transparent;
+            border-bottom: 1.5px dashed #2b6e4f;
+            min-width: auto;
+            border-radius: 0;
+            padding: 0 0.1rem;
+            display: inline;
         }
 
         .hidden-section {
@@ -220,42 +242,6 @@
             padding: 0 0.2rem;
         }
 
-        /* 淘汰賽規則區塊樣式 */
-        .elimination-box {
-            margin-top: 1.8rem;
-            padding: 1.25rem 1.5rem;
-            background-color: #f4f8f5;
-            border-left: 4.5px solid #2b6e4f;
-            border-radius: 12px;
-            font-size: 1.02rem;
-            line-height: 1.8;
-            color: #2c3e35;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            transition: all 0.2s ease-in-out;
-        }
-
-        .elimination-title {
-            font-weight: 700;
-            font-size: 1.18rem;
-            color: #1b4733;
-            margin-bottom: 0.6rem;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .elimination-subtitle {
-            font-weight: 700;
-            color: #235c42;
-            margin-top: 0.8rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .elimination-item {
-            margin-left: 0.2rem;
-            margin-bottom: 0.2rem;
-        }
-
         .declaration p {
             margin-bottom: 1.25rem;
         }
@@ -264,14 +250,22 @@
             margin-bottom: 0;
         }
 
-        .fill-editable:empty::before {
-            content: '';
-            display: inline-block;
-            width: 1rem;
+        .elimination-box {
+            margin-top: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            background: #fdf8f3;
+            border-left: 4px solid #d97706;
+            border-radius: 8px;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #451a03;
         }
 
-        .declaration[contenteditable="true"] .fill-editable {
-            background: transparent;
+        .elimination-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.6rem;
+            color: #b45309;
         }
 
         .status-msg {
@@ -327,8 +321,7 @@
             </div>
         </div>
 
-        <div class="declaration" id="declarationContent">
-        </div>
+        <div class="declaration" id="declarationContent"></div>
     </div>
 
     <script>
@@ -341,7 +334,7 @@
             const resetBtn = document.getElementById('resetBtn');
             const statusMsg = document.getElementById('statusMsg');
 
-            const STORAGE_KEY = 'declaration_saved_v3';
+            const STORAGE_KEY = 'declaration_saved_v2';
 
             let statusTimer = null;
             function showStatus(text, isError) {
@@ -405,7 +398,7 @@
                 const sectionAText = document.createElement('span');
                 sectionAText.className = 'fixed-text';
                 sectionAText.contentEditable = 'false';
-                sectionAText.textContent = '同時本場比賽中除了主審我以外，還有幾位裁判夥伴會一起協助執法，請裁判幫我舉手讓訓練家們知道一下喔。';
+                sectionAText.textContent = '同時本場比賽中除了主審我以外，還有幾位裁判夥伴會一起協助執法，請裁判幫我舉手讓訓練家們知道一下喔。 \n好的，謝謝請放下。';
                 sectionA.appendChild(sectionAText);
                 p4.appendChild(sectionA);
                 declarationEl.appendChild(p4);
@@ -417,7 +410,7 @@
                 const p6 = document.createElement('p');
                 const sectionB = document.createElement('span');
                 sectionB.className = 'section-wrapper toggleable-section';
-                const sectionBText = document.createElement('span');
+                sectionBText = document.createElement('span');
                 sectionBText.className = 'fixed-text';
                 sectionBText.contentEditable = 'false';
                 sectionBText.textContent = '如果玩家對於裁判的判決內容有任何問題，可以進行上訴，所有的上訴最終都會到我主審這邊，';
@@ -431,27 +424,23 @@
                 p7.appendChild(fixed('好的，如果都沒有的話，現在請各位訓練家跟你的對手打個招呼，我們比賽即將進行～'));
                 declarationEl.appendChild(p7);
 
-                // 單淘汰規則區塊 (預設建立，透過開關控制顯隱)
-                const elimDiv = createEliminationElement();
-                declarationEl.appendChild(elimDiv);
-            }
-
-            function createEliminationElement() {
-                const elimDiv = document.createElement('div');
-                elimDiv.className = 'elimination-box hidden-section';
-                elimDiv.id = 'eliminationSection';
-                elimDiv.innerHTML = `
-                    <div class="elimination-title">🏆 單淘汰規則</div>
-                    <div class="elimination-item">- 有一方距離獲勝所需獎賞卡剩下2張以下︰⇒獎賞卡少的一方獲得勝利。</div>
-                    <div class="elimination-item">- 若雙⽅距離獲勝所需獎賞卡數量相同時︰</div>
-                    <div class="elimination-item" style="padding-left: 1rem;">⇒比賽延長，直到一方達成勝利條件，或是獎賞卡較少的一方獲勝。</div>
-                    <div class="elimination-item" style="padding-left: 1rem;">⇒若仍無法分出勝負，則進行6張獎賞卡的延長賽。</div>
-                    <div class="elimination-subtitle">條件②</div>
-                    <div class="elimination-item">- 若雙方距離獲勝所需獎賞卡在3張以上時︰</div>
-                    <div class="elimination-item" style="padding-left: 1rem;">⇒比賽延長，直到一方達成勝利條件，或是有一方距離獲勝所需獎賞卡剩2張以下時獲勝。</div>
-                    <div class="elimination-item" style="padding-left: 1rem;">⇒若仍無法分出勝負，則進行6張獎賞卡的延長賽。</div>
+                // 單淘汰規則區塊
+                const elimBox = document.createElement('div');
+                elimBox.className = 'elimination-box hidden-section';
+                elimBox.id = 'eliminationSection';
+                elimBox.innerHTML = `
+                    <div class="elimination-title">單淘汰規則</div>
+                    <p><strong>條件①</strong><br>
+                    - 有一方距離獲勝所需獎賞卡剩下2張以下︰⇒獎賞卡少的一方獲得勝利。<br>
+                    - 若雙⽅距離獲勝所需獎賞卡數量相同時︰<br>
+                    &nbsp;&nbsp;⇒比賽延長，直到一方達成勝利條件，或是獎賞卡較少的一方獲勝。<br>
+                    &nbsp;&nbsp;⇒若仍無法分出勝負，則進行6張獎賞卡的延長賽。</p>
+                    <p style="margin-top:0.8rem;"><strong>條件②</strong><br>
+                    - 若雙方距離獲勝所需獎賞卡在3張以上時︰<br>
+                    &nbsp;&nbsp;⇒比賽延長，直到一方達成勝利條件，或是有一方距離獲勝所需獎賞卡剩2張以下時獲勝。<br>
+                    &nbsp;&nbsp;⇒若仍無法分出勝負，則進行6張獎賞卡的延長賽。</p>
                 `;
-                return elimDiv;
+                declarationEl.appendChild(elimBox);
             }
 
             function getCleanInnerHTML() {
@@ -468,15 +457,9 @@
                     const saved = localStorage.getItem(STORAGE_KEY);
                     if (saved && saved.trim() !== '') {
                         declarationEl.innerHTML = saved;
-                        // 確保載入時包含單淘汰區塊元素
-                        if (!document.getElementById('eliminationSection')) {
-                            declarationEl.appendChild(createEliminationElement());
-                        }
                         return true;
                     }
-                } catch (e) {
-                    // localStorage 無法使用時，使用預設
-                }
+                } catch (e) {}
                 return false;
             }
 
@@ -490,16 +473,13 @@
                     }
                 });
 
-                let elimSection = document.getElementById('eliminationSection');
-                if (!elimSection) {
-                    elimSection = createEliminationElement();
-                    declarationEl.appendChild(elimSection);
-                }
-
-                if (eliminationToggle.checked) {
-                    elimSection.classList.remove('hidden-section');
-                } else {
-                    elimSection.classList.add('hidden-section');
+                const elimSec = document.getElementById('eliminationSection');
+                if (elimSec) {
+                    if (eliminationToggle.checked) {
+                        elimSec.classList.remove('hidden-section');
+                    } else {
+                        elimSec.classList.add('hidden-section');
+                    }
                 }
             }
 
@@ -509,14 +489,16 @@
                 const fillSpans = decl.querySelectorAll('.fill-editable');
 
                 if (enabled) {
+                    // 開啟編輯模式：統一父級 contentEditable，解決 iPad Safari 在元素交界處刪除過度的問題
                     decl.contentEditable = 'true';
                     fixedSpans.forEach(span => {
-                        span.contentEditable = 'true';
+                        span.removeAttribute('contenteditable');
                     });
                     fillSpans.forEach(span => {
-                        span.contentEditable = 'true';
+                        span.removeAttribute('contenteditable');
                     });
                 } else {
+                    // 關閉編輯模式：恢復精確的個別填空編輯，防止編輯到固定文字
                     decl.contentEditable = 'false';
                     fixedSpans.forEach(span => {
                         span.contentEditable = 'false';
@@ -532,13 +514,14 @@
                 setPlainTextMode(plainToggle.checked);
             }
 
-            // 初始化頁面內容
+            // 初始化
             const hasSaved = loadSavedContent();
             if (!hasSaved) {
                 buildDefaultContent();
             }
             refreshAll();
 
+            // 事件綁定
             plainToggle.addEventListener('change', (e) => {
                 setPlainTextMode(e.target.checked);
             });
@@ -567,12 +550,7 @@
                 }
                 try {
                     localStorage.removeItem(STORAGE_KEY);
-                } catch (e) {
-                    // 忽略
-                }
-                plainToggle.checked = false;
-                soloJudgeToggle.checked = false;
-                eliminationToggle.checked = false;
+                } catch (e) {}
                 buildDefaultContent();
                 refreshAll();
                 showStatus('已重置回預設內容。', false);
