@@ -347,7 +347,9 @@
             const resetBtn = document.getElementById('resetBtn');
             const statusMsg = document.getElementById('statusMsg');
 
-            const STORAGE_KEY = 'declaration_saved_v3';
+            // 定義最新版本 Key，以及舊版相容 Key 列表
+            const CURRENT_STORAGE_KEY = 'declaration_saved_v3';
+            const LEGACY_STORAGE_KEYS = ['declaration_saved_v2', 'declaration_saved_v1'];
 
             let statusTimer = null;
             function showStatus(text, isError) {
@@ -465,6 +467,37 @@
                 declarationEl.appendChild(elimBox);
             }
 
+            function ensureEliminationSectionExists() {
+                // 確保從舊版載入的 HTML 中也含有最新格式的單淘汰區塊
+                if (!document.getElementById('eliminationSection')) {
+                    const elimBox = document.createElement('div');
+                    elimBox.className = 'elimination-box hidden-section';
+                    elimBox.id = 'eliminationSection';
+                    elimBox.innerHTML = `
+                        <div class="elimination-title">BO1單淘汰規則</div>
+                        <div class="elimination-item">
+                            <strong>條件①</strong><br>
+                            若雙方距離獲勝所需獎賞卡都在3張以上時︰
+                            <div class="elimination-sublist">
+                                1. 繼續比賽直到一方達成勝利條件，或是有一方距離獲勝所需獎賞卡剩2張以下時獲勝。<br>
+                                2. 若仍無法分出勝負，則進行6張獎賞卡的延長賽。
+                            </div>
+                        </div>
+                        <div class="elimination-item">
+                            <strong>條件②</strong><br>
+                            有一方距離獲勝所需獎賞卡剩下2張以下
+                            <div class="elimination-sublist">
+                                1. 獎賞卡少的一方獲得勝利。<br>
+                                2. 若獎賞卡數量相同時︰<br>
+                                &nbsp;&nbsp;⇒繼續比賽直到一方達成勝利條件，或是獎賞卡較少的一方獲勝。<br>
+                                &nbsp;&nbsp;⇒若仍無法分出勝負，則進行6張獎賞卡的延長賽。
+                            </div>
+                        </div>
+                    `;
+                    declarationEl.appendChild(elimBox);
+                }
+            }
+
             function getCleanInnerHTML() {
                 const clone = declarationEl.cloneNode(true);
                 clone.removeAttribute('contenteditable');
@@ -476,10 +509,24 @@
 
             function loadSavedContent() {
                 try {
-                    const saved = localStorage.getItem(STORAGE_KEY);
+                    // 1. 優先讀取最新版本的儲存內容
+                    let saved = localStorage.getItem(CURRENT_STORAGE_KEY);
                     if (saved && saved.trim() !== '') {
                         declarationEl.innerHTML = saved;
+                        ensureEliminationSectionExists();
                         return true;
+                    }
+
+                    // 2. 自動向下尋找舊版的儲存內容（避免升級後舊資料丟失）
+                    for (const legacyKey of LEGACY_STORAGE_KEYS) {
+                        saved = localStorage.getItem(legacyKey);
+                        if (saved && saved.trim() !== '') {
+                            declarationEl.innerHTML = saved;
+                            ensureEliminationSectionExists();
+                            // 自動無縫升級寫入最新 key
+                            localStorage.setItem(CURRENT_STORAGE_KEY, getCleanInnerHTML());
+                            return true;
+                        }
                     }
                 } catch (e) {}
                 return false;
@@ -557,7 +604,7 @@
             saveBtn.addEventListener('click', () => {
                 try {
                     const html = getCleanInnerHTML();
-                    localStorage.setItem(STORAGE_KEY, html);
+                    localStorage.setItem(CURRENT_STORAGE_KEY, html);
                     showStatus('已儲存！重新整理後將使用新版內容。', false);
                 } catch (e) {
                     showStatus('儲存失敗：' + e.message, true);
@@ -569,7 +616,8 @@
                     return;
                 }
                 try {
-                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(CURRENT_STORAGE_KEY);
+                    LEGACY_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
                 } catch (e) {}
                 buildDefaultContent();
                 refreshAll();
