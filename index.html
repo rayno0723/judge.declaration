@@ -3,10 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 禁止瀏覽器快取 Meta 標籤 -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>主審宣言</title>
     <style>
         * {
@@ -165,7 +161,6 @@
             transition: all 0.2s;
         }
 
-        /* 普通模式下的固定與填空樣式 */
         .fixed-text {
             user-select: none;
         }
@@ -199,7 +194,6 @@
             width: 1rem;
         }
 
-        /* 內文編輯模式下的樣式設定 (解決 Safari/iPadOS 刪除過度問題) */
         .declaration[contenteditable="true"] {
             background: #fefcf9;
             outline: 2px dashed #2b6e4f;
@@ -337,6 +331,52 @@
         <div class="declaration" id="declarationContent"></div>
     </div>
 
+    <!-- 🌐 Network-First Service Worker 註冊 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const CACHE_NAME = 'judge-netfirst-v1';
+                const swCode = `
+                    const CACHE_NAME = '${CACHE_NAME}';
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('activate', (e) => {
+                        e.waitUntil(
+                            caches.keys().then((keys) => Promise.all(
+                                keys.map((key) => key !== CACHE_NAME && caches.delete(key))
+                            )).then(() => self.clients.claim())
+                        );
+                    });
+                    self.addEventListener('fetch', (e) => {
+                        if (e.request.method !== 'GET' || !e.request.url.startsWith('http')) return;
+                        e.respondWith(
+                            fetch(e.request)
+                                .then((netRes) => {
+                                    if (netRes && (netRes.status === 200 || netRes.type === 'opaque')) {
+                                        const resClone = netRes.clone();
+                                        caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
+                                    }
+                                    return netRes;
+                                })
+                                .catch(() => caches.match(e.request).then((cached) => {
+                                    if (cached) return cached;
+                                    if (e.request.mode === 'navigate') return caches.match(e.request.url) || caches.match('./');
+                                }))
+                        );
+                    });
+                `;
+                try {
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    const blobUrl = URL.createObjectURL(blob);
+                    navigator.serviceWorker.register(blobUrl).catch(() => {
+                        navigator.serviceWorker.register('./sw.js').catch(() => {});
+                    });
+                } catch (err) {
+                    navigator.serviceWorker.register('./sw.js').catch(() => {});
+                }
+            });
+        }
+    </script>
+
     <script>
         (function() {
             const declarationEl = document.getElementById('declarationContent');
@@ -347,7 +387,6 @@
             const resetBtn = document.getElementById('resetBtn');
             const statusMsg = document.getElementById('statusMsg');
 
-            // 定義最新版本 Key，以及舊版相容 Key 列表
             const CURRENT_STORAGE_KEY = 'declaration_saved_v3';
             const LEGACY_STORAGE_KEYS = ['declaration_saved_v2', 'declaration_saved_v1'];
 
@@ -439,7 +478,6 @@
                 p7.appendChild(fixed('好的，如果都沒有的話，最後提醒各位玩家，請和你的對手友善且清楚明確地進行溝通與操作的宣告，那現在請各位訓練家跟你的對手打個招呼，我們比賽即將準備開始～'));
                 declarationEl.appendChild(p7);
 
-                // BO1單淘汰規則區塊
                 const elimBox = document.createElement('div');
                 elimBox.className = 'elimination-box hidden-section';
                 elimBox.id = 'eliminationSection';
@@ -468,7 +506,6 @@
             }
 
             function ensureEliminationSectionExists() {
-                // 確保從舊版載入的 HTML 中也含有最新格式的單淘汰區塊
                 if (!document.getElementById('eliminationSection')) {
                     const elimBox = document.createElement('div');
                     elimBox.className = 'elimination-box hidden-section';
@@ -509,7 +546,6 @@
 
             function loadSavedContent() {
                 try {
-                    // 1. 優先讀取最新版本的儲存內容
                     let saved = localStorage.getItem(CURRENT_STORAGE_KEY);
                     if (saved && saved.trim() !== '') {
                         declarationEl.innerHTML = saved;
@@ -517,13 +553,11 @@
                         return true;
                     }
 
-                    // 2. 自動向下尋找舊版的儲存內容（避免升級後舊資料丟失）
                     for (const legacyKey of LEGACY_STORAGE_KEYS) {
                         saved = localStorage.getItem(legacyKey);
                         if (saved && saved.trim() !== '') {
                             declarationEl.innerHTML = saved;
                             ensureEliminationSectionExists();
-                            // 自動無縫升級寫入最新 key
                             localStorage.setItem(CURRENT_STORAGE_KEY, getCleanInnerHTML());
                             return true;
                         }
@@ -581,14 +615,12 @@
                 setPlainTextMode(plainToggle.checked);
             }
 
-            // 初始化
             const hasSaved = loadSavedContent();
             if (!hasSaved) {
                 buildDefaultContent();
             }
             refreshAll();
 
-            // 事件綁定
             plainToggle.addEventListener('change', (e) => {
                 setPlainTextMode(e.target.checked);
             });
